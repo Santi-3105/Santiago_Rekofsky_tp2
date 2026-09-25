@@ -7,11 +7,15 @@ import com.aydsii.tp2.Ej4.repository.ClienteRepository;
 
 import org.springframework.stereotype.Service;
 
+
+//Indica que es de tipo Serivce, es algo que se instanciara una sola vez y se utilize durante la ejecucion
 @Service
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
 
+    //Inyeccion de dependencias. Crea una instancia de estos sin necesidad un New cuando arranca Spring
+    //Ventaja de que ya la recirbe armada como parametro
     public ClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
     }

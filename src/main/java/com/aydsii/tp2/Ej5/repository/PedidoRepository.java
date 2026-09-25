@@ -11,6 +11,12 @@ import java.util.List;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Integer> {
 
+
+        //Hace la query tal cual pide el enunciado, los fetch se utilizan para recorrer todas las tablas
+        //En este caso join fetch lo que hace es traer todo en la misma consulta, todo lo relacionado digamos
+        //Distinct para que no se repitan pedidos en un posible caso, por ej un pedido tiene tres productos, solo se da 1 pedido
+        //El exist lo que hara es devolverme el producto si al menos existe uno en una categoria, es decir de 5 productos 1 solo entra en una categoria x
+        //Lo ultimo conecta los nombres de la query con los parametros de mis clases, basicamente como un casteo para que no haya errores
     @Query("""
             SELECT DISTINCT p FROM Pedido p
             JOIN FETCH p.cliente c

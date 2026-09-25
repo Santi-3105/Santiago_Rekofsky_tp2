@@ -14,12 +14,19 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+
+//Indica que es de tipo Serivce, es algo que se instanciara una sola vez y se utilize durante la ejecucion
 @Service
 public class CatalogoService {
 
+
+    //Una coleccion dentro del ejercicio, tal y como se pide ya que no utilizaremos bdd por ahora. Solo se elimina si reiniciamos la app
     private final List<Producto> productos = new ArrayList<>();
+    //Uso atomic por si dos productos se meten a la vez, no van a compartir ID. Si usara solo long podria pasar
     private final AtomicLong secuenciaId = new AtomicLong(0);
 
+    //Se ejecuta este metodo automaticamente una sola vez, justo despues de que se construya todo, incluido las dependencias. 
+    //Cumple el requisito del tp que se cargen 8 productos de ejemplo al iniciar la app.
     @PostConstruct
     public void inicializarCatalogo() {
         agregarProductoInicial("Mouse inalambrico", "Perifericos", 4500.0, 25);
@@ -41,7 +48,9 @@ public class CatalogoService {
     }
 
     public List<Producto> buscar(String categoria, Double precioMin, Double precioMax) {
+        //El stream lo usaremos para "conectar", es decir es una secuencia de elementos sobre las cuales se hacen operaciones encadenadas
         return productos.stream()
+                //Los filtros los cuales pueden ser combinados o directamente no poner ninguno. Por eso esta la opcion de que sea null o contenga algo y de ahi la comparacion
                 .filter(p -> categoria == null || p.getCategoria().equalsIgnoreCase(categoria))
                 .filter(p -> precioMin == null || p.getPrecio() >= precioMin)
                 .filter(p -> precioMax == null || p.getPrecio() <= precioMax)
@@ -50,22 +59,26 @@ public class CatalogoService {
 
     public List<Producto> ordenar(String criterio, String orden) {
         Comparator<Producto> comparator = switch (criterio) {
+            //Se construye un comparador que comparara el "precio" con el precio obteneido del producto
             case "precio" -> Comparator.comparingDouble(Producto::getPrecio);
             case "nombre" -> Comparator.comparing(Producto::getNombre, String.CASE_INSENSITIVE_ORDER);
             default -> throw new BadRequestException("El criterio debe ser 'precio' o 'nombre'");
         };
 
         if ("desc".equalsIgnoreCase(orden)) {
+            //Utilizo un reversed para el orden, basicamente reutilizo el comparator hecho arriba y lo doy vuelta
             comparator = comparator.reversed();
         } else if (!"asc".equalsIgnoreCase(orden)) {
             throw new BadRequestException("El orden debe ser 'asc' o 'desc'");
         }
 
         return productos.stream()
+                //Genera una lista nueva, ordenada pero deja la lista orginal intacta dada por su orden de insercion
                 .sorted(comparator)
                 .collect(Collectors.toList());
     }
 
+    //Alta de un producto, el id se genera apartir de ese secuenciaId.IncrementAndGet
     public Producto agregar(ProductoDTO dto) {
         Producto producto = new Producto(
                 secuenciaId.incrementAndGet(),
@@ -94,6 +107,8 @@ public class CatalogoService {
 
     private Producto buscarPorId(Long id) {
         return productos.stream()
+        //Busca el id, basicamente obtiene el id del producto y lo compara, si son iguales lo encuentra y lo devuelve
+        //En cuyo casi sea null no tira direcamente el null sino que hace una instancia de una Exception, algo mas intuitivo de saber que fallo
                 .filter(p -> p.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un producto con id " + id));

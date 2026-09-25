@@ -27,6 +27,7 @@ import java.util.List;
 //Clase anotada que procesa solicitudes web y devuelve datos directamente (como JSON o XML) en lugar de renderizar una vista HTML
 @RestController
 //Es el proceso de conectar las peticiones HTTP que llegan al servidor con los métodos específicos de un controlador, es decir que lleguen como nuestro JSON
+//agrupa todos los endpoints de este controller bajo una sección desplegable llamada "Ventas"
 @RequestMapping("/api/ventas")
 @Validated
 @Tag(name = "Ventas", description = "Procesamiento en memoria de lotes de ventas recibidos de otro sistema")
